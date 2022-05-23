@@ -1,31 +1,43 @@
-# ITHome_Server
-Java SpringBoot
-API
-
-用户相关
-1.用户注册                post /user/register
-2.用户登录                post /user/login                  (每日登录积分+1)
-3.获取用户信息            get  /user/info
-4.编辑用户信息            post /user/info
-5.获取用户收藏            get  /user/collect
-6.获取用户推荐记录        get  /user/recommend
-7.获取用户积分记录        get  /user/score
-
-资源相关
-8.获取某专栏资源          get  /topic/:techTag
-9.查看某资源信息          post  /resource/see/:resId         (浏览量+1)
-10.资源评价               post  /resource/evaluate/:resId
-11.资源收藏               post  /resource/collect/:resId
-12.资源搜索               post  /resource/search
-13.资源筛选               post  /resource/screen
-14.资源推荐               post  /addRes
-
-审核中心
-15.审核资源               post  /examineRes
-16.发布公告               post  /announce
-17.设立/撤除管理员        post  /admin
-
-社交板块
-18.获取积分榜信息          get  /ranking
-19.获取网友信息            get  /friend
-20.发布个人信息            post /friend
+### To-do List
+- [ ] 用户板块
+  - [x] 注册
+  - [x] 登录
+  - [x] 获取个人信息
+  - [x] 编辑个人信息
+  - [ ] 获取用户收藏记录
+  - [ ] 获取用户推荐记录
+  - [ ] 获取用户积分记录
+  
+- [ ] 资源板块
+  - [x] 推荐资源
+  - [x] 筛选资源
+  - [x] 获取某个资源信息
+  - [x] 搜索资源
+  - [ ] 资源评价
+  - [ ] 资源收藏
+  - [ ] 资源排序
+  
+- [x] 运营中心
+  - [x] 审核
+    - [x] 获取待审资源列表
+    - [x] 获取某个待审资源信息
+    - [x] 审核资源
+  - [x] 管理
+    - [x] 获取管理员/普通用户列表
+    - [x] 搜索用户
+    - [x] 设立/废除管理员
+  - [x] 公告
+    - [x] 发布公告
+  
+- [ ] 社交板块
+  - [x] 公告
+    - [x] 查看历史公告
+  - [ ] 激励榜
+    - [ ] 查看积分榜
+  - [ ] 找伙伴
+    - [ ] 发布自我介绍
+    - [ ] 获取站友信息列表
+  - [ ] 许愿池
+    - [ ] 发布资源愿望
+    - [ ] 获取愿望列表
+    - [ ] 获取某个愿望信息
