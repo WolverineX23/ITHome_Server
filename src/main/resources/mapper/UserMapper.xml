@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.ithome.mapper.UserMapper">
+    <resultMap id="UserMap" type="com.project.ithome.entity.UserInfo">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="password" property="password"/>
+        <result column="point" property="point"/>
+        <result column="level" property="level"/>
+        <result column="interest_tag" property="interestTag" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="role" property="role"/>
+        <result column="email" property="email"/>
+        <result column="time_created" property="timeCreated"/>
+        <result column="time_modified" property="timeModified"/>
+    </resultMap>
+
+<!--
+    <insert id="registerUser" parameterType="UserDO">
+        insert into user_info values (##{userName},#{password},#{point},#{level},#{interestTags},#{role},#{email},#{timeCreated,#{timeModified});
+    </insert>
+
+    <select id="queryUserInfo" resultMap="UserMap" parameterType="String">
+        select * from user_info where user_name=#{userName};
+    </select>
+-->
+
+</mapper>

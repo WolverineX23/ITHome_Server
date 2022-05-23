@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.ithome.mapper.ResourceMapper">
+    <resultMap id="ResourceMap" type="com.project.ithome.entity.ResInfo">
+        <id column="res_id" property="resId"/>
+        <result column="res_name" property="resName"/>
+        <result column="res_link" property="resLink"/>
+        <result column="tech_tag" property="techTag" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="col_amount" property="colAmount"/>
+        <result column="views" property="views"/>
+        <result column="status" property="status"/>
+        <result column="res_description" property="resDescription"/>
+        <result column="res_detail" property="resDetail"/>
+        <result column="time_created" property="timeCreated"/>
+        <result column="time_modified" property="timeModified"/>
+    </resultMap>
+
+
+
+</mapper>
