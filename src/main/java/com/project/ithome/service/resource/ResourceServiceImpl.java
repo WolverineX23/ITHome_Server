@@ -173,7 +173,6 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     @Override
     public ResGetByTechTagResponseDTO getPassedResByTagArray(ResGetByTechTagRequestDTO queryInfo) {
         List<String> tagArray = queryInfo.getTechTag();
-        int tagCount = tagArray.size();
 
         QueryWrapper<ResInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("status", "Passed");   //资源已被共享到平台
