@@ -50,12 +50,12 @@ public class ResourceController {
         return ResponseEntity.ok(responseDTO);
     }
 
-    //通过资源ID获取该资源的数据
+    //通过资源ID获取该资源的数据(浏览量+1)  还需携带资源评价信息
     @UserLoginToken
     @PostMapping(value = "/{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<PassedResInfoDTO> getOnePassedResInfo(@PathVariable String resId) throws ResourceNotFoundException {
+    public ResponseEntity<PassedResInfoResponseDTO> getOnePassedResInfo(@RequestBody PassedResInfoRequestDTO requestDTO, @PathVariable String resId) throws ResourceNotFoundException {
         logger.info("Get res info of Id:{}", resId);
-        PassedResInfoDTO resInfoDTO = resourceService.getPassedResInfoById(resId);
+        PassedResInfoResponseDTO resInfoDTO = resourceService.getPassedResInfoById(requestDTO, resId);
         logger.info("getResInfoBtId:{}",resInfoDTO);
         return ResponseEntity.ok(resInfoDTO);
     }
@@ -69,6 +69,20 @@ public class ResourceController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    //评价资源
+    @UserLoginToken
+    @PostMapping(value = "evaluate/{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<EvaInfoResponseDTO> evaluateRes(
+            HttpServletRequest request,
+            @RequestBody EvaInfoRequestDTO requestDTO,
+            @PathVariable String resId
+    ) throws BaseException {
+        String token = request.getHeader("token");
+        logger.info("evaluateRes token: {}", token);
+        String userId = tokenService.getUserIdFromToken(token);
+        EvaInfoResponseDTO responseDTO = resourceService.evaluateRes(requestDTO, resId, userId);
+        return ResponseEntity.ok(responseDTO);
+    }
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<RestError> BaseExceptionHandler(BaseException e){

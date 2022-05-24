@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.project.ithome.dto.administration.*;
 import com.project.ithome.dto.resource.*;
+import com.project.ithome.entity.EvaMap;
+import com.project.ithome.entity.OperaRecord;
 import com.project.ithome.entity.ResInfo;
 import com.project.ithome.exception.resource.ResourceNotFoundException;
 import com.project.ithome.exception.resource.UltraViresException;
@@ -15,11 +17,23 @@ public interface ResourceService extends IService<ResInfo> {
     //判断生成的resId是否存在
     boolean isResIdExisted(String resId);
 
+    //判断生成的evaId是否存在
+    boolean isEvaIdExisted(String evaId);
+
     //将ResInfo 转化为 ResourceResume
     List<ResourceResume> parseResResume(List<ResInfo> resInfoList);
 
+    //将EvaMap 转化为 EvaluationDTO
+    List<EvaluationDTO> parseEvaluationDTO(List<EvaMap> evaMapList);
+
     //资源分页查询
     List<ResInfo> queryResInPage(QueryWrapper<ResInfo> wrapper, int pageNum, int size);
+
+    //记录分页查询
+    List<OperaRecord> queryRecordInPage(QueryWrapper<OperaRecord> wrapper, int pageNum, int size);
+
+    //评价映射信息分页查询
+    List<EvaMap> queryEvaMapInPage(QueryWrapper<EvaMap> wrapper, int pageNum, int size);
 
     //判断用户是否越权
     boolean isUserUltraVires(String userId);
@@ -31,7 +45,7 @@ public interface ResourceService extends IService<ResInfo> {
     ResGetByTechTagResponseDTO getPassedResByTagArray(ResGetByTechTagRequestDTO queryInfo);
 
     //根据资源ID获取该资源信息
-    PassedResInfoDTO getPassedResInfoById(String resId) throws ResourceNotFoundException;
+    PassedResInfoResponseDTO getPassedResInfoById(PassedResInfoRequestDTO req, String resId) throws ResourceNotFoundException;
 
     //资源搜索（全站搜索+专栏搜索）
     ResSearchResponseDTO searchRes(ResSearchRequestDTO searchInfo, String content);
@@ -44,4 +58,7 @@ public interface ResourceService extends IService<ResInfo> {
 
     //审核资源
     ExamineResResponseDTO examineRes(ExamineResRequestDTO examineInfo, String resId, String adminId) throws UltraViresException;
+
+    //评价资源
+    EvaInfoResponseDTO evaluateRes(EvaInfoRequestDTO req, String resId, String userId);
 }

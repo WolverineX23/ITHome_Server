@@ -10,9 +10,7 @@ import com.project.ithome.dto.resource.*;
 import com.project.ithome.entity.*;
 import com.project.ithome.exception.resource.ResourceNotFoundException;
 import com.project.ithome.exception.resource.UltraViresException;
-import com.project.ithome.mapper.RecordMapper;
-import com.project.ithome.mapper.ResourceMapper;
-import com.project.ithome.mapper.UserMapper;
+import com.project.ithome.mapper.*;
 import com.project.ithome.util.RandomAccountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +26,15 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     private final ResourceMapper resourceMapper;
     private final RecordMapper recordMapper;
     private final UserMapper userMapper;
+    private final EvaInfoMapper evaInfoMapper;
+    private final EvaMapMapper evaMapMapper;
 
-    public ResourceServiceImpl(ResourceMapper resourceMapper, RecordMapper recordMapper, UserMapper userMapper) {
+    public ResourceServiceImpl(ResourceMapper resourceMapper, RecordMapper recordMapper, UserMapper userMapper, EvaInfoMapper evaInfoMapper, EvaMapMapper evaMapMapper) {
         this.resourceMapper = resourceMapper;
         this.recordMapper = recordMapper;
         this.userMapper = userMapper;
+        this.evaInfoMapper = evaInfoMapper;
+        this.evaMapMapper = evaMapMapper;
     }
 
     @Override
@@ -45,6 +47,19 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
         logger.info("resource:{} is existed", resId);
         return true;
     }
+
+    @Override
+    public boolean isEvaIdExisted(String evaId) {
+        EvaInfo evaInfo = evaInfoMapper.selectById(evaId);
+        if(evaInfo == null) {
+            logger.info("evaluation:{} is nonexistent", evaId);
+            return false;
+        }
+        logger.info("evaluation:{} is existed", evaId);
+        return true;
+    }
+
+
 
     @Override
     public List<ResourceResume> parseResResume(List<ResInfo> resList) {
@@ -63,6 +78,20 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
+    public List<EvaluationDTO> parseEvaluationDTO(List<EvaMap> evaMapList) {
+        List<EvaluationDTO> evaluationDTOList = new ArrayList<>();
+        for(EvaMap evaMap : evaMapList) {
+            String evaId = evaMap.getEvaId();
+            String userId = evaMap.getUserId();
+            EvaInfo evaInfo = evaInfoMapper.selectById(evaId);
+            UserInfo userInfo = userMapper.selectById(userId);
+            EvaluationDTO evaluationDTO = new EvaluationDTO(userId, userInfo.getUserName(), evaInfo.getStar(), evaInfo.getComment(), evaInfo.getTimeCreated());
+            evaluationDTOList.add(evaluationDTO);
+        }
+        return evaluationDTOList;
+    }
+
+    @Override
     public List<ResInfo> queryResInPage(QueryWrapper<ResInfo> wrapper, int pageNum, int size) {
         IPage<ResInfo> resPage = new Page<>(pageNum, size);
         resPage = resourceMapper.selectPage(resPage, wrapper);
@@ -70,6 +99,24 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
         List<ResInfo> resList = resPage.getRecords();
         logger.info("resource list: {}", resList);
         return resList;
+    }
+
+    @Override
+    public List<OperaRecord> queryRecordInPage(QueryWrapper<OperaRecord> wrapper, int pageNum, int size) {
+        IPage<OperaRecord> recordPage = new Page<>(pageNum, size);
+        recordPage = recordMapper.selectPage(recordPage, wrapper);
+        List<OperaRecord> recordList = recordPage.getRecords();
+        logger.info("record list: {}", recordList);
+        return recordList;
+    }
+
+    @Override
+    public List<EvaMap> queryEvaMapInPage(QueryWrapper<EvaMap> wrapper, int pageNum, int size) {
+        IPage<EvaMap> evaMapPage = new Page<>(pageNum, size);
+        evaMapPage = evaMapMapper.selectPage(evaMapPage, wrapper);
+        List<EvaMap> evaMapList = evaMapPage.getRecords();
+        logger.info("evaMap list: {}", evaMapList);
+        return evaMapList;
     }
 
     @Override
@@ -130,8 +177,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
 
         QueryWrapper<ResInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("status", "Passed");   //资源已被共享到平台
-        for (int i = 0; i < tagCount; i++) {
-            wrapper.like("tech_tag", tagArray.get(i));
+        for (String tag : tagArray) {
+            wrapper.like("tech_tag", tag);
         }
         List<ResInfo> resList = queryResInPage(wrapper, queryInfo.getPageNum(), queryInfo.getPageSize());
         int pageCount = resList.size();
@@ -141,7 +188,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
-    public PassedResInfoDTO getPassedResInfoById(String resId) throws ResourceNotFoundException {
+    public PassedResInfoResponseDTO getPassedResInfoById(PassedResInfoRequestDTO req, String resId) throws ResourceNotFoundException {
         ResInfo resInfo = resourceMapper.selectById(resId);
         logger.info("resource info of id{}, {}", resId, resInfo);
         if(resInfo == null)
@@ -158,8 +205,19 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
         LocalDateTime passedTime = record.get(0).getTimeCreated();
         UserInfo user = userMapper.selectById(recommenderId);
         String recommenderName = user.getUserName();
-        PassedResInfoDTO resInfoDTO = new PassedResInfoDTO(resInfo, recommenderId, recommenderName, passedTime, "success");
-        logger.info("resInfoDTO");
+
+        QueryWrapper<EvaMap> evaMapWrapper = new QueryWrapper<>();
+        evaMapWrapper.eq("res_id", resId).orderByDesc("time_created"); //从最新评论开始
+        List<EvaMap> evaMapList = queryEvaMapInPage(evaMapWrapper, req.getPageNum(), req.getPageSize());
+        List<EvaluationDTO> evaluationList = parseEvaluationDTO(evaMapList);
+        int pageCount = evaluationList.size();
+        int totalCount = evaMapMapper.selectCount(evaMapWrapper).intValue();
+        logger.info("get evaluations:{}", evaluationList);
+        logger.info(" pageCount:{}, totalCount:{}", pageCount, totalCount);
+
+
+        PassedResInfoResponseDTO resInfoDTO = new PassedResInfoResponseDTO(resInfo, recommenderId, recommenderName, passedTime,evaluationList, pageCount, totalCount, "success");
+        logger.info("getPassedResInfoById:{}",resInfoDTO);
 
         return resInfoDTO;
     }
@@ -287,5 +345,55 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
         int examineResultInsert = recordMapper.insert(examineResultRec);
         logger.info("Insert {} data about a record of a resource{} get a result:{}", examineResultInsert, resId, examineInfo.getResult());
         return new ExamineResResponseDTO("success");
+    }
+
+    @Override
+    public EvaInfoResponseDTO evaluateRes(EvaInfoRequestDTO req, String resId, String userId) {
+        boolean isExisted = true;
+        String evaId = "";
+        while (isExisted) {                                               //生成唯一的evaId    14位
+            evaId = RandomAccountUtil.randomDigitNumber(14);
+            isExisted = isEvaIdExisted(evaId);
+        }
+        logger.info("Unique evaId generated: {}", evaId);
+
+        //判断该用户该次评价是否为当日首次评价
+        QueryWrapper<OperaRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", userId).eq("opera_id", 3).orderByDesc("time_created");
+        List<OperaRecord> evaRecord = queryRecordInPage(wrapper, 1, 1);     //查询最新一条评价记录
+        boolean isFirstEvaPerDay = true;
+        if(!evaRecord.isEmpty()) {
+            int year = evaRecord.get(0).getTimeCreated().getYear();
+            int dayOfYear = evaRecord.get(0).getTimeCreated().getDayOfYear();
+            LocalDateTime time = LocalDateTime.now();
+            if(year == time.getYear() && dayOfYear == time.getDayOfYear()) {
+                isFirstEvaPerDay = false;
+                logger.info("Is not the first evaluation.");
+            }
+        }
+        //若为当日首次评论，插入记录并更新积分
+        if(isFirstEvaPerDay) {
+            //插入每日首次评价记录
+            OperaRecord evaPerDayRecord = new OperaRecord(userId, 3, resId, "每日资源评价");
+            int recordInsert = recordMapper.insert(evaPerDayRecord);
+            logger.info("Insert {} data in opera_record table. evaPerDayRecord:{}", recordInsert, evaPerDayRecord);
+            //更新积分
+            UserInfo user = userMapper.selectById(userId);
+            user.setPoint(user.getPoint() + 2);             //+2分
+            if(user.getPoint() / 30 != user.getLevel())
+                user.setLevel(user.getLevel() + 1);         //等级
+            int userUpdate = userMapper.updateById(user);
+            logger.info("Update {} data in user_info. userId:{}, point:{}, level:{}",userUpdate, userId, user.getPoint(), user.getLevel());
+        }
+        //插入评价数据
+        EvaInfo evaInfo = new EvaInfo(evaId, req.getStar(), req.getComment());
+        int evaInfoInsert = evaInfoMapper.insert(evaInfo);
+        logger.info("Insert {} data in eva_info table. evaInfo:{}", evaInfoInsert, evaInfo);
+        //插入评价映射关系
+        EvaMap evaMap = new EvaMap(userId, resId, evaId);
+        int evaMapInsert = evaMapMapper.insert(evaMap);
+        logger.info("Insert {} data in eva_map table. evaMap:{}", evaMapInsert, evaMap);
+
+        return new EvaInfoResponseDTO("success");
     }
 }
