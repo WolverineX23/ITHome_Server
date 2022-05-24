@@ -9,6 +9,7 @@ import com.project.ithome.authentication.service.TokenService;
 import com.project.ithome.dto.administration.*;
 import com.project.ithome.dto.social.*;
 import com.project.ithome.dto.user.*;
+import com.project.ithome.entity.OperaInfo;
 import com.project.ithome.entity.OperaRecord;
 import com.project.ithome.entity.Role;
 import com.project.ithome.entity.UserInfo;
@@ -17,6 +18,7 @@ import com.project.ithome.exception.user.NoNewEditInfoException;
 import com.project.ithome.exception.user.NoResultSearchException;
 import com.project.ithome.exception.user.RegisterException;
 import com.project.ithome.exception.user.WrongPasswordException;
+import com.project.ithome.mapper.OperationMapper;
 import com.project.ithome.mapper.RecordMapper;
 import com.project.ithome.mapper.UserMapper;
 import com.project.ithome.util.RandomAccountUtil;
@@ -33,10 +35,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     private final static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserMapper userMapper;
     private final RecordMapper recordMapper;
+    private final OperationMapper operationMapper;
 
-    public UserServiceImpl(UserMapper userMapper, RecordMapper recordMapper) {
+    public UserServiceImpl(UserMapper userMapper, RecordMapper recordMapper, OperationMapper operationMapper) {
         this.userMapper = userMapper;
         this.recordMapper = recordMapper;
+        this.operationMapper = operationMapper;
     }
 
 
@@ -312,10 +316,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
-    public List<OperaRecord> queryAnnounceRecordInPage(QueryWrapper<OperaRecord> wrapper, int pageNum, int pageSize) {
-        IPage<OperaRecord> announcePage = new Page<>(pageNum, pageSize);
-        announcePage = recordMapper.selectPage(announcePage, wrapper);
-        return announcePage.getRecords();
+    public List<OperaRecord> queryRecordInPage(QueryWrapper<OperaRecord> wrapper, int pageNum, int pageSize) {
+        IPage<OperaRecord> recordPage = new Page<>(pageNum, pageSize);
+        recordPage = recordMapper.selectPage(recordPage, wrapper);
+        return recordPage.getRecords();
     }
 
     @Override
@@ -329,10 +333,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
+    public List<PointRecord> parsePointRecord(List<OperaRecord> recordList) {
+        List<PointRecord> pointRecList = new ArrayList<>();
+        for (OperaRecord operaRecord : recordList) {
+            PointRecord pointRecord = new PointRecord();
+            pointRecord.setRecTime(operaRecord.getTimeCreated());
+            int operaId = operaRecord.getOperaId();
+            OperaInfo operaInfo = operationMapper.selectById(operaId);
+            pointRecord.setPoint(operaInfo.getScore());
+            pointRecord.setRecordDesc(operaInfo.getOperaName());
+            pointRecList.add(pointRecord);
+        }
+        return pointRecList;
+    }
+
+    @Override
     public AnnounceListResponseDTO getAnnounceList(AnnounceListRequestDTO req) {
         QueryWrapper<OperaRecord> announceWrapper = new QueryWrapper<>();
         announceWrapper.eq("opera_id", 9).orderByDesc("time_created");  //最近发布优先
-        List<OperaRecord> operaRecordList = queryAnnounceRecordInPage(announceWrapper, req.getPageNum(), req.getPageSize());
+        List<OperaRecord> operaRecordList = queryRecordInPage(announceWrapper, req.getPageNum(), req.getPageSize());
         List<AnnounceInfo> announceInfoList = parseAnnounceInfo(operaRecordList);
         int pageCount = announceInfoList.size();
         int totalCount = recordMapper.selectCount(announceWrapper).intValue();
@@ -365,6 +384,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
         int rank = userMapper.getRowNumberByUserId(userId);
         logger.info("user:{} rank of total scoreboard:{}", userId, rank);
         return new SelfRankDTO(rank, "success");
+    }
+
+    @Override
+    public RecordOfPointResponseDTO getRecListOfPoint(RecordOfPointRequestDTO req, String userId) {
+        QueryWrapper<OperaRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", userId)
+                .between("opera_id", 1,7)
+                .ne("opera_id",2)
+                .orderByDesc("time_created");
+        List<OperaRecord> operaRecList = queryRecordInPage(wrapper, req.getPageNum(), req.getPageSize());
+        List<PointRecord> pointRecList = parsePointRecord(operaRecList);
+        int pageCount = pointRecList.size();
+        int totalCount = recordMapper.selectCount(wrapper).intValue();
+        logger.info("Record list of point:{}",pointRecList);
+        logger.info("pageCount:{}, totalCount:{}", pageCount, totalCount);
+
+        return new RecordOfPointResponseDTO(pointRecList, pageCount, totalCount, "success");
     }
 
 

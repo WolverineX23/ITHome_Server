@@ -3,6 +3,7 @@ package com.project.ithome.controller;
 import com.project.ithome.authentication.annotation.PassToken;
 import com.project.ithome.authentication.annotation.UserLoginToken;
 import com.project.ithome.authentication.exception.UserNotFoundException;
+import com.project.ithome.authentication.service.TokenService;
 import com.project.ithome.dto.RestError;
 import com.project.ithome.dto.user.*;
 import com.project.ithome.exception.BaseException;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -24,9 +26,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
+    private final TokenService tokenService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService, TokenService tokenService){
         this.userService = userService;
+        this.tokenService = tokenService;
     }
 
     //用户注册
@@ -65,6 +69,20 @@ public class UserController {
         UserInfoEditResponseDTO response = userService.editUserInfo(request);
         logger.info("Edit info:{}", response.getUser());
         return ResponseEntity.ok(response);
+    }
+
+    //获取积分记录
+    @UserLoginToken
+    @GetMapping(value = "/point", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<RecordOfPointResponseDTO> getRecListOfPoint(
+            HttpServletRequest request,
+            @RequestBody RecordOfPointRequestDTO requestDTO
+    ) throws BaseException {
+        String token = request.getHeader("token");
+        logger.info("getRecListOfPoint token: {}", token);
+        String userId = tokenService.getUserIdFromToken(token);
+        RecordOfPointResponseDTO responseDTO = userService.getRecListOfPoint(requestDTO, userId);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @ExceptionHandler(BaseException.class)

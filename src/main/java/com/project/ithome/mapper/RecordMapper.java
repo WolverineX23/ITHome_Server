@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RecordMapper extends BaseMapper<OperaRecord> {
+    //sql获取积分记录等
 }

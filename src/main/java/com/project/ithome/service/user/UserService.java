@@ -62,11 +62,15 @@ public interface UserService extends IService<UserInfo> {
     //设立/废除管理员  站长权限
     OperaAdminResponseDTO operaAdmin(OperaAdminRequestDTO operaInfo, String masterId) throws UltraViresException;
 
-    //公告分页查询
-    List<OperaRecord> queryAnnounceRecordInPage(QueryWrapper<OperaRecord> wrapper, int pageNum, int pageSize);
+    //记录分页查询
+    List<OperaRecord> queryRecordInPage(QueryWrapper<OperaRecord> wrapper, int pageNum, int pageSize);
+
 
     //将 OperaRecord 转化为 AnnounceInfo
     List<AnnounceInfo> parseAnnounceInfo(List<OperaRecord> recordList);
+
+    //将OperaRecord 转化为 PointRecord
+    List<PointRecord> parsePointRecord(List<OperaRecord> recordList);
 
     //获取历史公告 无权限限制
     AnnounceListResponseDTO getAnnounceList(AnnounceListRequestDTO req);
@@ -79,4 +83,7 @@ public interface UserService extends IService<UserInfo> {
 
     //获取个人排名
     SelfRankDTO getSelfRank(String userId);
+
+    //获取积分记录
+    RecordOfPointResponseDTO getRecListOfPoint(RecordOfPointRequestDTO req, String userId);
 }
