@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.project.ithome.authentication.exception.UserNotFoundException;
 import com.project.ithome.dto.administration.*;
+import com.project.ithome.dto.social.*;
 import com.project.ithome.dto.user.*;
 import com.project.ithome.entity.OperaRecord;
 import com.project.ithome.entity.UserInfo;
@@ -46,6 +47,9 @@ public interface UserService extends IService<UserInfo> {
     //将UserInfo 转化为 UserSearchResult
     List<UserSearchResult> parseUserSearchResult(List<UserInfo> userInfoList);
 
+    //将UserInfo 转化为 SelfRankInfo
+    List<RankInfo> parseUserRankInfo(List<UserInfo> userInfoList);
+
     //用户分页查询
     List<UserInfo> queryUserInPage(QueryWrapper<UserInfo> wrapper, int pageNum, int pageSize);
 
@@ -65,8 +69,14 @@ public interface UserService extends IService<UserInfo> {
     List<AnnounceInfo> parseAnnounceInfo(List<OperaRecord> recordList);
 
     //获取历史公告 无权限限制
-    GetAnnounceResponseDTO getAnnounceList(GetAnnounceRequestDTO req);
+    AnnounceListResponseDTO getAnnounceList(AnnounceListRequestDTO req);
 
     //发布公告
     AnnounceResponseDTO announce(AnnounceRequestDTO req, String masterId) throws UltraViresException;
+
+    //获取积分榜
+    ScoreboardDTO getScoreboard();
+
+    //获取个人排名
+    SelfRankDTO getSelfRank(String userId);
 }

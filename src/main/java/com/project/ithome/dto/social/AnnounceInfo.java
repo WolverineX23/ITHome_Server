@@ -1,4 +1,4 @@
-package com.project.ithome.dto.user;
+package com.project.ithome.dto.social;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

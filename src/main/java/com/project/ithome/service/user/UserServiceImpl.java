@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.project.ithome.authentication.exception.UserNotFoundException;
 import com.project.ithome.authentication.service.TokenService;
 import com.project.ithome.dto.administration.*;
+import com.project.ithome.dto.social.*;
 import com.project.ithome.dto.user.*;
 import com.project.ithome.entity.OperaRecord;
 import com.project.ithome.entity.Role;
@@ -66,8 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
         if(insert == 0) {
             throw new RegisterException();
         }
-        UserRegisterResponseDTO userRegisterResponseDTO = new UserRegisterResponseDTO(newId, "success");
-        return userRegisterResponseDTO;
+        return new UserRegisterResponseDTO(newId, "success");
     }
 
     @Override
@@ -148,12 +148,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
                 .eq("opera_id", 6);
         List<OperaRecord> record = recordMapper.selectList(wrapper);
         logger.info("user:{} first edit userInfo record--{}", userId, record);
-/*
+        /*
         HashMap<String, Object> map = new HashMap<>();
         map.put("user_id", userId);
         map.put("opera_id", 6);
         List<OperaRecord> record = recordMapper.selectByMap(map);
- */
+        */
 
         //这里record为[] 不等于 record == null
         if(record.isEmpty()) {
@@ -218,6 +218,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
             userSearchResultList.add(userSearchResult);
         }
         return userSearchResultList;
+    }
+
+    @Override
+    public List<RankInfo> parseUserRankInfo(List<UserInfo> userInfoList) {
+        List<RankInfo> rankInfoList = new ArrayList<>();
+        for(int i = 0; i < userInfoList.size(); ++i) {
+            UserInfo user = userInfoList.get(i);
+            RankInfo rankInfo = new RankInfo(user.getUserId(), user.getUserName(), user.getPoint(), i+1);
+            rankInfoList.add(rankInfo);
+        }
+        logger.info("selfRankInfoList:{}", rankInfoList);
+        return rankInfoList;
     }
 
     @Override
@@ -317,7 +329,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
-    public GetAnnounceResponseDTO getAnnounceList(GetAnnounceRequestDTO req) {
+    public AnnounceListResponseDTO getAnnounceList(AnnounceListRequestDTO req) {
         QueryWrapper<OperaRecord> announceWrapper = new QueryWrapper<>();
         announceWrapper.eq("opera_id", 9).orderByDesc("time_created");  //最近发布优先
         List<OperaRecord> operaRecordList = queryAnnounceRecordInPage(announceWrapper, req.getPageNum(), req.getPageSize());
@@ -326,7 +338,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
         int totalCount = recordMapper.selectCount(announceWrapper).intValue();
         logger.info("get announce list: pageCount:{}, totalCount:{}, record:{}", pageCount, totalCount, announceInfoList);
 
-        return new GetAnnounceResponseDTO(announceInfoList, pageCount, totalCount, "success");
+        return new AnnounceListResponseDTO(announceInfoList, pageCount, totalCount, "success");
     }
 
     @Override
@@ -337,6 +349,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
         int insert = recordMapper.insert(announceRecord);
         logger.info("Insert {} data in opera_record table. announceRecord:{}", insert, announceRecord);
         return new AnnounceResponseDTO("success");
+    }
+
+    @Override
+    public ScoreboardDTO getScoreboard() {
+        QueryWrapper<UserInfo> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("point");
+        List<UserInfo> userInfoList = queryUserInPage(wrapper,1, 10); //前十名
+        List<RankInfo> rankInfoList = parseUserRankInfo(userInfoList);
+        return new ScoreboardDTO(rankInfoList, "success");
+    }
+
+    @Override
+    public SelfRankDTO getSelfRank(String userId) {
+        int rank = userMapper.getRowNumberByUserId(userId);
+        logger.info("user:{} rank of total scoreboard:{}", userId, rank);
+        return new SelfRankDTO(rank, "success");
     }
 
 

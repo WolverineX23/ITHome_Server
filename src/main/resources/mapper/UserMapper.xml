@@ -13,15 +13,23 @@
         <result column="time_created" property="timeCreated"/>
         <result column="time_modified" property="timeModified"/>
     </resultMap>
+    <!--
+        <insert id="registerUser" parameterType="UserDO">
+            insert into user_info values (##{userName},#{password},#{point},#{level},#{interestTags},#{role},#{email},#{timeCreated,#{timeModified});
+        </insert>
 
-<!--
-    <insert id="registerUser" parameterType="UserDO">
-        insert into user_info values (##{userName},#{password},#{point},#{level},#{interestTags},#{role},#{email},#{timeCreated,#{timeModified});
-    </insert>
-
-    <select id="queryUserInfo" resultMap="UserMap" parameterType="String">
-        select * from user_info where user_name=#{userName};
+        <select id="queryUserInfo" resultMap="UserMap" parameterType="String">
+            select * from user_info where user_name=#{userName};
+        </select>
+    -->
+    <select id="getRankByUserId" resultType="java.lang.Integer">
+        select point_rank from (select user_id, RANK() OVER (ORDER BY point DESC) point_rank FROM user_info) rank_table where user_id = #{userId};
     </select>
--->
+
+    <select id="getRowNumberByUserId" resultType="java.lang.Integer">
+        SELECT point_rank FROM (SELECT user_id, ROW_NUMBER() OVER (ORDER BY point DESC) point_rank FROM user_info) rank_table WHERE user_id = #{userId};
+    </select>
+
+    <select id="getTotalScoreboard" resultType="com.project.ithome.dto.social.RankInfo"/>
 
 </mapper>

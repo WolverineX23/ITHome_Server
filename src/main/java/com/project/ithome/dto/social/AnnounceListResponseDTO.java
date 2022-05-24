@@ -1,4 +1,4 @@
-package com.project.ithome.dto.user;
+package com.project.ithome.dto.social;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetAnnounceResponseDTO implements Serializable {
+public class AnnounceListResponseDTO implements Serializable {
     private List<AnnounceInfo> announceList;
     private int pageCount;
     private int totalCount;
