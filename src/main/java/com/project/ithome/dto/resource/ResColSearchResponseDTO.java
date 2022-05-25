@@ -8,9 +8,9 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class ResSearchResponseDTO implements Serializable {
+@AllArgsConstructor
+public class ResColSearchResponseDTO implements Serializable {
     private List<ResourceResume> resResumeList;
     private int pageCount;
     private int totalCount;

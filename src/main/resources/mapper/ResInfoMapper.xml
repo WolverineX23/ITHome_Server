@@ -15,6 +15,13 @@
         <result column="time_modified" property="timeModified"/>
     </resultMap>
 
+    <update id="updateModifiedTimeInRes">
+        UPDATE res_info SET time_modified = #{examineTime} WHERE res_id = #{resId};
+    </update>
+
+    <select id="getPassedTimeByResId" resultType="java.time.LocalDateTime">
+        SELECT time_created FROM opera_record WHERE res_id = #{resId} AND opera_id = 7;
+    </select>
 
 
 </mapper>

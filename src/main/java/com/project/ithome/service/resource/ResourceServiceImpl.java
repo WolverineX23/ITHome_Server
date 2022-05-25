@@ -222,30 +222,60 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
-    public ResSearchResponseDTO searchRes(ResSearchRequestDTO searchInfo, String content) {
+    public QueryWrapper<ResInfo> getResWrapper(List<String> tagArr, OrderAttr orderAttr, String content) {
         QueryWrapper<ResInfo> resWrapper = new QueryWrapper<>();
-        resWrapper.eq("status", Status.Passed)
-                .like("res_name", content)          //(sql-like模糊搜索)
-                .orderByDesc("col_amount");         //默认按照收藏量降序排列
-        //先判断是何种搜索
-        //全站搜索
-        if(searchInfo.getTagArray().isEmpty()) {
-            logger.info("Total station search: {}", searchInfo);
+        resWrapper.eq("status", Status.Passed);
+
+        if(!content.equals(""))
+            resWrapper.like("res_name", content);   //若为空， 仍考虑排序和筛选因素
+
+        //结合排序
+        if(orderAttr.equals(OrderAttr.Time))   //默认按资源发布时间排序
+            resWrapper.orderByDesc("time_modified");    //为通过时间  默认新资源在前
+        else if(orderAttr.equals(OrderAttr.Views))  //按浏览量排序
+            resWrapper.orderByDesc("views");
+        else if(orderAttr.equals(OrderAttr.ColAmount))
+            resWrapper.orderByDesc("col_amount");
+        else{
+            //按照评价（平均星级）
+            logger.info("Order by {}", OrderAttr.Evaluation);
         }
-        else{       //基于技术标签集合的搜索/专栏搜索
-            int tagCount = searchInfo.getTagArray().size();
+
+        //结合标签筛选
+        if(!tagArr.isEmpty()) {
+            int tagCount = tagArr.size();
             for(int i=0; i< tagCount; i++) {
-                resWrapper.like("tech_tag", searchInfo.getTagArray().get(i));
+                resWrapper.like("tech_tag", tagArr.get(i));
             }
-            logger.info("Column search: {}", searchInfo);
         }
+
+        return resWrapper;
+    }
+
+    @Override
+    public ResTotalSearchResponseDTO totalSearchRes(ResTotalSearchRequestDTO searchInfo, String content) {
+
+        QueryWrapper<ResInfo> resWrapper = getResWrapper(searchInfo.getTagArray(), searchInfo.getOrderAttr(), content);
         int totalCount = resourceMapper.selectCount(resWrapper).intValue();        //相关资源总量
         List<ResInfo> resList = queryResInPage(resWrapper, searchInfo.getPageNum(), searchInfo.getPageSize());
         int pageCount = resList.size();             //相关资源当前页数量
         List<ResourceResume> resResumeList = parseResResume(resList);
-        ResSearchResponseDTO resSearchResponseDTO = new ResSearchResponseDTO(resResumeList, pageCount, totalCount, "success");
-        logger.info("search result: {}", resSearchResponseDTO);
-        return resSearchResponseDTO;
+        ResTotalSearchResponseDTO resTotalSearchResponseDTO = new ResTotalSearchResponseDTO(resResumeList, pageCount, totalCount, "success");
+        logger.info("total search result: {}", resTotalSearchResponseDTO);
+        return resTotalSearchResponseDTO;
+    }
+
+    @Override
+    public ResColSearchResponseDTO colSearchRes(ResColSearchRequestDTO searchInfo, String tag, String content) {
+        QueryWrapper<ResInfo> resWrapper = getResWrapper(searchInfo.getTagArray(), searchInfo.getOrderAttr(), content);
+        resWrapper.like("tech_tag", tag);   //附加专栏自带标签
+        int totalCount = resourceMapper.selectCount(resWrapper).intValue();        //相关资源总量
+        List<ResInfo> resList = queryResInPage(resWrapper, searchInfo.getPageNum(), searchInfo.getPageSize());
+        int pageCount = resList.size();             //相关资源当前页数量
+        List<ResourceResume> resResumeList = parseResResume(resList);
+        ResColSearchResponseDTO resColSearchResponseDTO = new ResColSearchResponseDTO(resResumeList, pageCount, totalCount, "success");
+        logger.info("column search result: {}", resColSearchResponseDTO);
+        return resColSearchResponseDTO;
     }
 
     @Override
@@ -330,6 +360,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
                 recommender.setLevel(recommender.getLevel() + 1);   //recommender.setLevel(recommender.getPoint() / 30);
             int updateRecommender = userMapper.updateById(recommender);
             logger.info("Update {} data about recommender who:{} recommended a resource successfully.", updateRecommender, examineInfo.getRecommenderId());
+
+            //更新该条资源的time_modified字段
+            resourceMapper.updateModifiedTimeInRes(LocalDateTime.now(), resId);
+            logger.info("Update the modified_time to the passed_time of the res{}.", resId);
         }
         else{                                                               //若审核拒绝
             //更新被审核的资源的状态

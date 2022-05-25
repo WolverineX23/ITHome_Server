@@ -60,12 +60,25 @@ public class ResourceController {
         return ResponseEntity.ok(resInfoDTO);
     }
 
-    //资源搜索
+    //全站资源搜索
     @UserLoginToken
     @GetMapping(value = "/{content}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResSearchResponseDTO> searchRes(@RequestBody ResSearchRequestDTO requestDTO, @PathVariable String content) {
-        logger.info("Search Content:{}", content);
-        ResSearchResponseDTO responseDTO = resourceService.searchRes(requestDTO, content);
+    public ResponseEntity<ResTotalSearchResponseDTO> totalSearchRes(@RequestBody ResTotalSearchRequestDTO requestDTO, @PathVariable String content) {
+        logger.info("Total search content:{}", content);
+        ResTotalSearchResponseDTO responseDTO = resourceService.totalSearchRes(requestDTO, content);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    //专栏资源搜索
+    @UserLoginToken
+    @GetMapping(value = "/{tag}/{content}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<ResColSearchResponseDTO> colSearchRes(
+            @RequestBody ResColSearchRequestDTO requestDTO,
+            @PathVariable String tag,
+            @PathVariable String content
+    ) {
+        logger.info("Column search content:{}", content);
+        ResColSearchResponseDTO responseDTO = resourceService.colSearchRes(requestDTO, tag, content);
         return ResponseEntity.ok(responseDTO);
     }
 

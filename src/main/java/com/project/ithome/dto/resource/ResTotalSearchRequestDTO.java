@@ -6,8 +6,9 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class ResSearchRequestDTO implements Serializable {
+public class ResTotalSearchRequestDTO implements Serializable {
     private List<String> tagArray;
+    private OrderAttr orderAttr;
     private int pageNum;
     private int pageSize;
 }

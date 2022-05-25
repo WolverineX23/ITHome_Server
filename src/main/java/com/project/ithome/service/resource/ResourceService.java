@@ -47,8 +47,14 @@ public interface ResourceService extends IService<ResInfo> {
     //根据资源ID获取该资源信息
     PassedResInfoResponseDTO getPassedResInfoById(PassedResInfoRequestDTO req, String resId) throws ResourceNotFoundException;
 
-    //资源搜索（全站搜索+专栏搜索）
-    ResSearchResponseDTO searchRes(ResSearchRequestDTO searchInfo, String content);
+    //搜索——分页查询  条件构造器
+    QueryWrapper<ResInfo> getResWrapper(List<String> tagArr, OrderAttr orderAttr, String content);
+
+    //资源全站搜索
+    ResTotalSearchResponseDTO totalSearchRes(ResTotalSearchRequestDTO searchInfo, String content);
+
+    //资源专栏搜索
+    ResColSearchResponseDTO colSearchRes(ResColSearchRequestDTO searchInfo, String tag, String content);
 
     //分页获取待审核资源
     PendingResPageResponseDTO getPendingResPage(PendingResPageRequestDTO requestInfo, String userId) throws UltraViresException;
