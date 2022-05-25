@@ -109,8 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
-    public UserInfoGetResponseDTO getUserInfo(UserInfoGetRequestDTO getInfo) {
-        String userId = getInfo.getUserId();
+    public UserInfoGetResponseDTO getUserInfo(String userId) {
         UserInfo user = userMapper.selectById(userId);
         UserInfoGetResponseDTO userInfoGetResponseDTO = new UserInfoGetResponseDTO(user, "success");
         logger.info("Get user info {}", user);
@@ -244,13 +243,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
-    public UserPageInfoResponseDTO getUserPageInfo(UserPageInfoRequestDTO req, String masterId) throws UltraViresException {
+    public UserPageInfoResponseDTO getUserPageInfo(int pageNum, int pageSize, String masterId) throws UltraViresException {
         if(!isStationMaster(masterId))
             throw new UltraViresException(masterId);
         //获取管理员信息列表
         QueryWrapper<UserInfo> adminWrapper = new QueryWrapper<>();
         adminWrapper.eq("role", Role.Admin).orderByDesc("point");       //根据积分排名
-        List<UserInfo> adminInfoList = queryUserInPage(adminWrapper, req.getPageNum(), req.getPageSize());
+        List<UserInfo> adminInfoList = queryUserInPage(adminWrapper, pageNum, pageSize);
         List<UserPageInfo> adminPageInfoList = parseUserPageInfo(adminInfoList);  //数据压缩（page中每个数据仅有id和name）
         int adminPageCount = adminPageInfoList.size();      //管理员页表本页人数
         int adminTotalCount = userMapper.selectCount(adminWrapper).intValue();
@@ -258,7 +257,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
         //获取普通用户信息列表
         QueryWrapper<UserInfo> normalUserWrapper = new QueryWrapper<>();
         normalUserWrapper.eq("role", Role.NormalUser).orderByDesc("point");
-        List<UserInfo> normalUserinfoList = queryUserInPage(normalUserWrapper, req.getPageNum(), req.getPageSize());
+        List<UserInfo> normalUserinfoList = queryUserInPage(normalUserWrapper, pageNum, pageSize);
         List<UserPageInfo> normalUserPageInfoList = parseUserPageInfo(normalUserinfoList);
         int normalUserPageCount = normalUserPageInfoList.size();
         int normalUserTotalCount = userMapper.selectCount(normalUserWrapper).intValue();
@@ -268,18 +267,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
-    public UserSearchResponseDTO searchUser(UserSearchRequestDTO searchInfo, String masterId, String content) throws UltraViresException, NoResultSearchException {
+    public UserSearchResponseDTO searchUser(int pageNum, int pageSize, String masterId, String content) throws UltraViresException, NoResultSearchException {
         if(!isStationMaster(masterId))
             throw new UltraViresException(masterId);
         //搜索
         QueryWrapper<UserInfo> userWrapper = new QueryWrapper<>();
+        //当content为空值时，响应API:getUserPageInfo
         userWrapper.eq("user_id", content).or().eq("user_name", content);
         int totalCount = userMapper.selectCount(userWrapper).intValue();
         if(totalCount == 0) {
             logger.info("userSearch: no user with the searching content:{}",content);
             throw new NoResultSearchException(content);
         }
-        List<UserInfo> userInfoList = queryUserInPage(userWrapper, searchInfo.getPageNum(), searchInfo.getPageSize());
+        List<UserInfo> userInfoList = queryUserInPage(userWrapper, pageNum, pageSize);
         List<UserSearchResult> userSearchResultList = parseUserSearchResult(userInfoList);
         int pageCount = userSearchResultList.size();
         logger.info("userSearchResult pageCount:{}, totalCount:{}, page list: {}", pageCount, totalCount, userSearchResultList);
@@ -348,10 +348,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
-    public AnnounceListResponseDTO getAnnounceList(AnnounceListRequestDTO req) {
+    public AnnounceListResponseDTO getAnnounceList(int pageNum, int pageSize) {
         QueryWrapper<OperaRecord> announceWrapper = new QueryWrapper<>();
         announceWrapper.eq("opera_id", 9).orderByDesc("time_created");  //最近发布优先
-        List<OperaRecord> operaRecordList = queryRecordInPage(announceWrapper, req.getPageNum(), req.getPageSize());
+        List<OperaRecord> operaRecordList = queryRecordInPage(announceWrapper, pageNum, pageSize);
         List<AnnounceInfo> announceInfoList = parseAnnounceInfo(operaRecordList);
         int pageCount = announceInfoList.size();
         int totalCount = recordMapper.selectCount(announceWrapper).intValue();
@@ -387,13 +387,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo>  implemen
     }
 
     @Override
-    public RecordOfPointResponseDTO getRecListOfPoint(RecordOfPointRequestDTO req, String userId) {
+    public RecordOfPointResponseDTO getRecListOfPoint(int pageNum, int pageSize, String userId) {
         QueryWrapper<OperaRecord> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId)
                 .between("opera_id", 1,7)
                 .ne("opera_id",2)
                 .orderByDesc("time_created");
-        List<OperaRecord> operaRecList = queryRecordInPage(wrapper, req.getPageNum(), req.getPageSize());
+        List<OperaRecord> operaRecList = queryRecordInPage(wrapper, pageNum, pageSize);
         List<PointRecord> pointRecList = parsePointRecord(operaRecList);
         int pageCount = pointRecList.size();
         int totalCount = recordMapper.selectCount(wrapper).intValue();

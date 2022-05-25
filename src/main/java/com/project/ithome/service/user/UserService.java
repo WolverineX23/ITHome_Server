@@ -30,7 +30,7 @@ public interface UserService extends IService<UserInfo> {
         throws WrongPasswordException, UserNotFoundException;
 
     //个人信息获取
-    UserInfoGetResponseDTO getUserInfo(UserInfoGetRequestDTO getInfo);
+    UserInfoGetResponseDTO getUserInfo(String userId);
 
     //个人信息编辑(与原始数据相同的情况，返回异常提醒)
     UserInfoEditResponseDTO editUserInfo(UserInfoEditRequestDTO editInfo) throws NoNewEditInfoException;
@@ -54,10 +54,10 @@ public interface UserService extends IService<UserInfo> {
     List<UserInfo> queryUserInPage(QueryWrapper<UserInfo> wrapper, int pageNum, int pageSize);
 
     //获取管理员列表和用户列表  站长权限
-    UserPageInfoResponseDTO getUserPageInfo(UserPageInfoRequestDTO req, String masterId) throws UltraViresException;
+    UserPageInfoResponseDTO getUserPageInfo(int pageNum, int pageSize, String masterId) throws UltraViresException;
 
     //搜索用户(其中 未搜索到用户的异常抛出非必要)   站长权限
-    UserSearchResponseDTO searchUser(UserSearchRequestDTO searchInfo, String masterId, String content) throws UltraViresException, NoResultSearchException;
+    UserSearchResponseDTO searchUser(int pageNum, int pageSize, String masterId, String content) throws UltraViresException, NoResultSearchException;
 
     //设立/废除管理员  站长权限
     OperaAdminResponseDTO operaAdmin(OperaAdminRequestDTO operaInfo, String masterId) throws UltraViresException;
@@ -73,7 +73,7 @@ public interface UserService extends IService<UserInfo> {
     List<PointRecord> parsePointRecord(List<OperaRecord> recordList);
 
     //获取历史公告 无权限限制
-    AnnounceListResponseDTO getAnnounceList(AnnounceListRequestDTO req);
+    AnnounceListResponseDTO getAnnounceList(int pageNum, int pageSize);
 
     //发布公告
     AnnounceResponseDTO announce(AnnounceRequestDTO req, String masterId) throws UltraViresException;
@@ -85,5 +85,5 @@ public interface UserService extends IService<UserInfo> {
     SelfRankDTO getSelfRank(String userId);
 
     //获取积分记录
-    RecordOfPointResponseDTO getRecListOfPoint(RecordOfPointRequestDTO req, String userId);
+    RecordOfPointResponseDTO getRecListOfPoint(int pageNum, int pageSize, String userId);
 }

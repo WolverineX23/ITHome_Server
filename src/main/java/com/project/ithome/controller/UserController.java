@@ -56,9 +56,11 @@ public class UserController {
     //获取用户信息
     @UserLoginToken
     @GetMapping(value = "/info", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<UserInfoGetResponseDTO> getUserInfo(@RequestBody  UserInfoGetRequestDTO request) {
-        UserInfoGetResponseDTO response = userService.getUserInfo(request);
-        logger.info("Get {} info: {}", request.getUserId(), response.getUser());
+    public ResponseEntity<UserInfoGetResponseDTO> getUserInfo(HttpServletRequest request) throws BaseException {
+        String token = request.getHeader("token");
+        logger.info("getUserInfo token: {}", token);
+        String userId = tokenService.getUserIdFromToken(token);
+        UserInfoGetResponseDTO response = userService.getUserInfo(userId);
         return ResponseEntity.ok(response);
     }
 
@@ -76,12 +78,13 @@ public class UserController {
     @GetMapping(value = "/point", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<RecordOfPointResponseDTO> getRecListOfPoint(
             HttpServletRequest request,
-            @RequestBody RecordOfPointRequestDTO requestDTO
+            @RequestParam int pageNum,
+            @RequestParam int pageSize
     ) throws BaseException {
         String token = request.getHeader("token");
         logger.info("getRecListOfPoint token: {}", token);
         String userId = tokenService.getUserIdFromToken(token);
-        RecordOfPointResponseDTO responseDTO = userService.getRecListOfPoint(requestDTO, userId);
+        RecordOfPointResponseDTO responseDTO = userService.getRecListOfPoint(pageNum, pageSize, userId);
         return ResponseEntity.ok(responseDTO);
     }
 

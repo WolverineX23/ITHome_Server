@@ -35,12 +35,13 @@ public class AdministrationController {
     @GetMapping(value = "/examine", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<PendingResPageResponseDTO> getPendingResPage(
             HttpServletRequest request,
-            @RequestBody PendingResPageRequestDTO requestDTO
+            @RequestParam int pageNum,
+            @RequestParam int pageSize
     ) throws BaseException{
         String token = request.getHeader("token");
         logger.info("getPendingResPage token: {}", token);
         String userId = tokenService.getUserIdFromToken(token);
-        PendingResPageResponseDTO responseDTO = resourceService.getPendingResPage(requestDTO, userId);
+        PendingResPageResponseDTO responseDTO = resourceService.getPendingResPage(pageNum, pageSize, userId);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -78,12 +79,13 @@ public class AdministrationController {
     @GetMapping(value = "/admin", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<UserPageInfoResponseDTO> getUserPageInfo(
             HttpServletRequest request,
-            @RequestBody UserPageInfoRequestDTO requestDTO
+            @RequestParam int pageNum,
+            @RequestParam int pageSize
     ) throws BaseException{
         String token = request.getHeader("token");
         logger.info("getUserPageInfo token: {}", token);
         String userId = tokenService.getUserIdFromToken(token);
-        UserPageInfoResponseDTO responseDTO = userService.getUserPageInfo(requestDTO, userId);
+        UserPageInfoResponseDTO responseDTO = userService.getUserPageInfo(pageNum, pageSize, userId);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -92,13 +94,12 @@ public class AdministrationController {
     @GetMapping(value = "/admin/{content}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<UserSearchResponseDTO> searchUser(        //若content值为空，则当作/admin接口响应
             HttpServletRequest request,
-            @PathVariable String content,
-            @RequestBody UserSearchRequestDTO requestDTO
+            @PathVariable String content, @RequestParam int pageNum, @RequestParam int pageSize
     ) throws  BaseException {
         String token = request.getHeader("token");
         logger.info("searchUser token: {}", token);
         String userId = tokenService.getUserIdFromToken(token);
-        UserSearchResponseDTO responseDTO = userService.searchUser(requestDTO, userId, content);
+        UserSearchResponseDTO responseDTO = userService.searchUser(pageNum, pageSize, userId, content);
         return ResponseEntity.ok(responseDTO);
     }
 

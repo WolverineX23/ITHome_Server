@@ -279,7 +279,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
-    public PendingResPageResponseDTO getPendingResPage(PendingResPageRequestDTO requestInfo, String userId) throws UltraViresException {
+    public PendingResPageResponseDTO getPendingResPage(int pageNum, int pageSize, String userId) throws UltraViresException {
         //判断访问该接口的用户是否有权限
         if(isUserUltraVires(userId)) {
             logger.info("User{} do not have access to the api.", userId);
@@ -288,12 +288,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
 
         QueryWrapper<ResInfo> resWrapper = new QueryWrapper<>();
         resWrapper.eq("status", Status.Pending).orderByDesc("time_created");   //按照推荐时间倒序，最新推荐在前
-        List<ResInfo> pendingResList = queryResInPage(resWrapper, requestInfo.getPageNum(), requestInfo.getPageSize());
+        List<ResInfo> pendingResList = queryResInPage(resWrapper, pageNum, pageSize);
         List<ResourceResume> pendingResResumeList = parseResResume(pendingResList);
         int pageCount = pendingResResumeList.size();
         int totalCount = resourceMapper.selectCount(resWrapper).intValue();   //selectCount!!!
         PendingResPageResponseDTO pendingResPageResponseDTO = new PendingResPageResponseDTO(pendingResResumeList, pageCount, totalCount, "success");
-        logger.info("Pending Resource Info in page {}: {}", requestInfo.getPageNum(), pendingResPageResponseDTO);
+        logger.info("Pending Resource Info in page {}: {}", pageNum, pendingResPageResponseDTO);
         return pendingResPageResponseDTO;
     }
 

@@ -57,7 +57,7 @@ public interface ResourceService extends IService<ResInfo> {
     ResColSearchResponseDTO colSearchRes(ResColSearchRequestDTO searchInfo, String tag, String content);
 
     //分页获取待审核资源
-    PendingResPageResponseDTO getPendingResPage(PendingResPageRequestDTO requestInfo, String userId) throws UltraViresException;
+    PendingResPageResponseDTO getPendingResPage(int pageNum, int pageSize, String userId) throws UltraViresException;
 
     //获取某个待审资源的信息
     PendingResInfoDTO getPendingResInfoById(String resId, String userId) throws ResourceNotFoundException, UltraViresException;

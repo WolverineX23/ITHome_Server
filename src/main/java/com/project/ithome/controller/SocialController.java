@@ -33,8 +33,8 @@ public class SocialController {
     //获取历史公告
     @UserLoginToken
     @GetMapping(value = "/announce", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<AnnounceListResponseDTO> getAnnounceList(@RequestBody AnnounceListRequestDTO requestDTO) {
-        AnnounceListResponseDTO responseDTO = userService.getAnnounceList(requestDTO);
+    public ResponseEntity<AnnounceListResponseDTO> getAnnounceList(@RequestParam int pageNum, @RequestParam int pageSize) {
+        AnnounceListResponseDTO responseDTO = userService.getAnnounceList(pageNum, pageSize);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -74,8 +74,8 @@ public class SocialController {
     //找朋友：获取战友信息列表
     @UserLoginToken
     @GetMapping(value = "/friend", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<FriendListResponseDTO> getFriendList(@RequestBody FriendListRequestDTO requestDTO) {
-        FriendListResponseDTO responseDTO = friendService.getFriendList(requestDTO);
+    public ResponseEntity<FriendListResponseDTO> getFriendList(@RequestParam int pageNum, @RequestParam int pageSize) {
+        FriendListResponseDTO responseDTO = friendService.getFriendList(pageNum, pageSize);
         return ResponseEntity.ok(responseDTO);
     }
 

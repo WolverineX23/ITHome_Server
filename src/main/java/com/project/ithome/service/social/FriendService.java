@@ -19,5 +19,5 @@ public interface FriendService extends IService<FriendInfo> {
     FriendInfoFillResponseDTO fillFriendInfo(FriendInfoFillRequestDTO req, String userId);
 
     //找朋友：获取信息列表
-    FriendListResponseDTO getFriendList(FriendListRequestDTO req);
+    FriendListResponseDTO getFriendList(int pageNum, int pageSize);
 }

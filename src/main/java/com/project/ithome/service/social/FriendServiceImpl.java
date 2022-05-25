@@ -81,10 +81,10 @@ public class FriendServiceImpl extends ServiceImpl<FriendMapper, FriendInfo> imp
     }
 
     @Override
-    public FriendListResponseDTO getFriendList(FriendListRequestDTO req) {
+    public FriendListResponseDTO getFriendList(int pageNum, int pageSize) {
         QueryWrapper<FriendInfo> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc("time_created");
-        List<FriendInfo> friendInfoList = queryFriendInfoInPage(wrapper, req.getPageNum(), req.getPageSize());
+        List<FriendInfo> friendInfoList = queryFriendInfoInPage(wrapper, pageNum, pageSize);
         List<FriendInfoDTO> friendList = parseFriendInfoDTO(friendInfoList);
         logger.info("friendList dto:{}",friendList);
         int pageCount = friendList.size();
