@@ -30,4 +30,7 @@ public interface UserMapper extends BaseMapper<UserInfo> {
 
     //总积分榜（前十位）
     List<RankInfo> getTotalScoreboard();
+
+    //根据Id获得name
+    String getUserNameById(String userId);
 }

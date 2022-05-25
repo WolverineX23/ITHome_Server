@@ -31,5 +31,8 @@
     </select>
 
     <select id="getTotalScoreboard" resultType="com.project.ithome.dto.social.RankInfo"/>
+    <select id="getUserNameById" resultType="java.lang.String">
+        SELECT user_name FROM user_info WHERE user_id = #{userId};
+    </select>
 
 </mapper>
