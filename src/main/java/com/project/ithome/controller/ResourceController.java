@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
-@RequestMapping("/resource")
+@RequestMapping("resource")
 @CrossOrigin
 public class ResourceController {
 
@@ -32,7 +32,7 @@ public class ResourceController {
 
     //推荐资源
     @UserLoginToken
-    @PostMapping(value = "/recommend", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "recommend", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ResRecommendResponseDTO> resourceRecommend(HttpServletRequest request, @RequestBody ResRecommendRequestDTO requestDTO) throws BaseException{
         String token = request.getHeader("token");
         logger.info("resourceRecommend token: {}", token);
@@ -58,7 +58,7 @@ public class ResourceController {
 
     //通过资源ID获取该资源的数据(浏览量+1)  还需携带资源评价信息
     @UserLoginToken
-    @PostMapping(value = "/{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<PassedResInfoResponseDTO> getOnePassedResInfo(@RequestBody PassedResInfoRequestDTO requestDTO, @PathVariable String resId) throws ResourceNotFoundException {
         logger.info("Get res info of Id:{}", resId);
         PassedResInfoResponseDTO resInfoDTO = resourceService.getPassedResInfoById(requestDTO, resId);
@@ -68,7 +68,7 @@ public class ResourceController {
 
     //全站资源搜索
     @UserLoginToken
-    @GetMapping(value = "/total", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "total", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ResTotalSearchResponseDTO> totalSearchRes(
             @RequestParam List<String> tagArr,
             @RequestParam OrderAttr orderAttr,
@@ -83,7 +83,7 @@ public class ResourceController {
 
     //专栏资源搜索
     @UserLoginToken
-    @GetMapping(value = "/column/{tag}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "column/{tag}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ResColSearchResponseDTO> colSearchRes(
             @PathVariable String tag,
             @RequestParam List<String> tagArr,

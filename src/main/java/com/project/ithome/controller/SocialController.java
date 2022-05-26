@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping(value = "/social")
+@RequestMapping(value = "social")
 @CrossOrigin
 public class SocialController {
     private final Logger logger = LoggerFactory.getLogger(SocialController.class);
@@ -32,7 +32,7 @@ public class SocialController {
 
     //获取历史公告
     @UserLoginToken
-    @GetMapping(value = "/announce", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "announce", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<AnnounceListResponseDTO> getAnnounceList(@RequestParam int pageNum, @RequestParam int pageSize) {
         AnnounceListResponseDTO responseDTO = userService.getAnnounceList(pageNum, pageSize);
         return ResponseEntity.ok(responseDTO);
@@ -40,7 +40,7 @@ public class SocialController {
 
     //激励榜
     @UserLoginToken
-    @GetMapping(value = "/rank", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "rank", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ScoreboardDTO> getScoreboard() {
         ScoreboardDTO responseDTO = userService.getScoreboard();
         return ResponseEntity.ok(responseDTO);
@@ -48,7 +48,7 @@ public class SocialController {
 
     //获取个人积分排名
     @UserLoginToken
-    @GetMapping(value = "/rank/self", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "rank/self", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<SelfRankDTO> getSelfRank(HttpServletRequest request) throws BaseException {
         String token = request.getHeader("token");
         logger.info("getSelfRank token: {}", token);
@@ -59,7 +59,7 @@ public class SocialController {
 
     //找朋友：发布个人简介
     @UserLoginToken
-    @PostMapping(value = "/friend", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "friend", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<FriendInfoFillResponseDTO> fillFriendInfo(
             HttpServletRequest request,
             @RequestBody FriendInfoFillRequestDTO requestDTO
@@ -73,7 +73,7 @@ public class SocialController {
 
     //找朋友：获取战友信息列表
     @UserLoginToken
-    @GetMapping(value = "/friend", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "friend", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<FriendListResponseDTO> getFriendList(@RequestParam int pageNum, @RequestParam int pageSize) {
         FriendListResponseDTO responseDTO = friendService.getFriendList(pageNum, pageSize);
         return ResponseEntity.ok(responseDTO);

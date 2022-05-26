@@ -32,7 +32,7 @@ public class AdministrationController {
 
     //获取待审核的资源页
     @UserLoginToken
-    @GetMapping(value = "/examine", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "examine", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<PendingResPageResponseDTO> getPendingResPage(
             HttpServletRequest request,
             @RequestParam int pageNum,
@@ -47,7 +47,7 @@ public class AdministrationController {
 
     //获取某个待审资源的信息
     @UserLoginToken
-    @GetMapping(value = "/examine/{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "examine/{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<PendingResInfoDTO> getOnePendingResInfo(
             HttpServletRequest request,
             @PathVariable String resId
@@ -61,7 +61,7 @@ public class AdministrationController {
 
     //审核资源
     @UserLoginToken
-    @PostMapping(value = "/examine/{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "examine/{resId}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ExamineResResponseDTO> examineRes(
             HttpServletRequest request,
             @PathVariable String resId,
@@ -76,7 +76,7 @@ public class AdministrationController {
 
     //获取管理员列表和用户列表
     @UserLoginToken
-    @GetMapping(value = "/admin", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "admin", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<UserPageInfoResponseDTO> getUserPageInfo(
             HttpServletRequest request,
             @RequestParam int pageNum,
@@ -91,7 +91,7 @@ public class AdministrationController {
 
     //搜索用户
     @UserLoginToken
-    @GetMapping(value = "/admin/{content}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "admin/{content}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<UserSearchResponseDTO> searchUser(        //若content值为空，则当作/admin接口响应
             HttpServletRequest request,
             @PathVariable String content, @RequestParam int pageNum, @RequestParam int pageSize
@@ -105,7 +105,7 @@ public class AdministrationController {
 
     //设立/废除管理员
     @UserLoginToken
-    @PostMapping(value = "/admin", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "admin", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<OperaAdminResponseDTO> operaAdmin(
             HttpServletRequest request,
             @RequestBody OperaAdminRequestDTO requestDTO
@@ -119,7 +119,7 @@ public class AdministrationController {
 
     //发布公告
     @UserLoginToken
-    @PostMapping(value = "/announce", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "announce", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<AnnounceResponseDTO> pushAnnouncement(
             HttpServletRequest request,
             @RequestBody AnnounceRequestDTO requestDTO
