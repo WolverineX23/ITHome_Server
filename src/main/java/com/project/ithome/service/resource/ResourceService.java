@@ -38,11 +38,14 @@ public interface ResourceService extends IService<ResInfo> {
     //判断用户是否越权
     boolean isUserUltraVires(String userId);
 
+    //wrapper排序属性添加
+    void addOrderAttrInWrapper(QueryWrapper<ResInfo> resWrapper, OrderAttr orderAttr);
+
     //推荐资源
     ResRecommendResponseDTO recommendResource(ResRecommendRequestDTO recommendInfo, String userId);
 
     //根据技术标签集合获取相关资源
-    ResGetByTechTagResponseDTO getPassedResByTagArray(ResGetByTechTagRequestDTO queryInfo);
+    ResGetByTechTagResponseDTO getPassedResByTagArray(List<String> tagArr, OrderAttr orderAttr, int pageNum, int pageSize);
 
     //根据资源ID获取该资源信息
     PassedResInfoResponseDTO getPassedResInfoById(PassedResInfoRequestDTO req, String resId) throws ResourceNotFoundException;
@@ -51,10 +54,10 @@ public interface ResourceService extends IService<ResInfo> {
     QueryWrapper<ResInfo> getResWrapper(List<String> tagArr, OrderAttr orderAttr, String content);
 
     //资源全站搜索
-    ResTotalSearchResponseDTO totalSearchRes(ResTotalSearchRequestDTO searchInfo, String content);
+    ResTotalSearchResponseDTO totalSearchRes(List<String> tagArr, OrderAttr orderAttr, String content, int pageNum, int pageSize);
 
     //资源专栏搜索
-    ResColSearchResponseDTO colSearchRes(ResColSearchRequestDTO searchInfo, String tag, String content);
+    ResColSearchResponseDTO colSearchRes(String tag, List<String> tagArr, OrderAttr orderAttr, String content, int pageNum, int pageSize);
 
     //分页获取待审核资源
     PendingResPageResponseDTO getPendingResPage(int pageNum, int pageSize, String userId) throws UltraViresException;

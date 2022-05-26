@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @RequestMapping("/resource")
@@ -43,9 +44,14 @@ public class ResourceController {
     //通过tag集合筛选资源
     @UserLoginToken
     @GetMapping(value = "",produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResGetByTechTagResponseDTO> getPassedResByTagArray(@RequestBody ResGetByTechTagRequestDTO requestDTO) {
-        logger.info("Request data: {}", requestDTO);
-        ResGetByTechTagResponseDTO responseDTO = resourceService.getPassedResByTagArray(requestDTO);
+    public ResponseEntity<ResGetByTechTagResponseDTO> getPassedResByTagArray(
+            @RequestParam List<String> tagArr,
+            @RequestParam OrderAttr orderAttr,
+            @RequestParam int pageNum,
+            @RequestParam int pageSize
+    ) {
+        logger.info("tagArr:{}, orderAttr:{}, pageNum:{}, pageSize:{}", tagArr, orderAttr, pageNum, pageSize);
+        ResGetByTechTagResponseDTO responseDTO = resourceService.getPassedResByTagArray(tagArr, orderAttr, pageNum, pageSize);
         logger.info("Response data: {}", responseDTO);
         return ResponseEntity.ok(responseDTO);
     }
@@ -62,23 +68,32 @@ public class ResourceController {
 
     //全站资源搜索
     @UserLoginToken
-    @GetMapping(value = "/{content}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResTotalSearchResponseDTO> totalSearchRes(@RequestBody ResTotalSearchRequestDTO requestDTO, @PathVariable String content) {
-        logger.info("Total search content:{}", content);
-        ResTotalSearchResponseDTO responseDTO = resourceService.totalSearchRes(requestDTO, content);
+    @GetMapping(value = "/total", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<ResTotalSearchResponseDTO> totalSearchRes(
+            @RequestParam List<String> tagArr,
+            @RequestParam OrderAttr orderAttr,
+            @RequestParam String content,
+            @RequestParam int pageNum,
+            @RequestParam int pageSize
+    ) {
+        logger.info("tagArr:{}, orderAttr:{}, content:{}, pageNum:{}, pageSize:{}", tagArr, orderAttr, content, pageNum, pageSize);
+        ResTotalSearchResponseDTO responseDTO = resourceService.totalSearchRes(tagArr, orderAttr, content, pageNum, pageSize);
         return ResponseEntity.ok(responseDTO);
     }
 
     //专栏资源搜索
     @UserLoginToken
-    @GetMapping(value = "/{tag}/{content}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/column/{tag}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ResColSearchResponseDTO> colSearchRes(
-            @RequestBody ResColSearchRequestDTO requestDTO,
             @PathVariable String tag,
-            @PathVariable String content
+            @RequestParam List<String> tagArr,
+            @RequestParam OrderAttr orderAttr,
+            @RequestParam String content,
+            @RequestParam int pageNum,
+            @RequestParam int pageSize
     ) {
-        logger.info("Column search content:{}", content);
-        ResColSearchResponseDTO responseDTO = resourceService.colSearchRes(requestDTO, tag, content);
+        logger.info("Column:{} search content:{}", tag, content);
+        ResColSearchResponseDTO responseDTO = resourceService.colSearchRes(tag, tagArr, orderAttr, content, pageNum, pageSize);
         return ResponseEntity.ok(responseDTO);
     }
 

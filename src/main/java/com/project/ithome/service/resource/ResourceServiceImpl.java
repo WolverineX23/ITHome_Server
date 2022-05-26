@@ -132,6 +132,21 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
+    public void addOrderAttrInWrapper(QueryWrapper<ResInfo> resWrapper, OrderAttr orderAttr) {
+        //结合排序
+        if(orderAttr.equals(OrderAttr.Time))   //默认按资源发布时间排序
+            resWrapper.orderByDesc("time_modified");    //为通过时间  默认新资源在前
+        else if(orderAttr.equals(OrderAttr.Views))  //按浏览量排序
+            resWrapper.orderByDesc("views");
+        else if(orderAttr.equals(OrderAttr.ColAmount))
+            resWrapper.orderByDesc("col_amount");
+        else{
+            //按照评价（平均星级）
+            logger.info("Order by {}", OrderAttr.Evaluation);
+        }
+    }
+
+    @Override
     public ResRecommendResponseDTO recommendResource(ResRecommendRequestDTO recommendInfo, String userId) {
         //根据链接（唯一键）判断资源是否存在且status = passed  ——自动过滤
         QueryWrapper<ResInfo> resourceQueryWrapper = new QueryWrapper<>();
@@ -171,15 +186,16 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
-    public ResGetByTechTagResponseDTO getPassedResByTagArray(ResGetByTechTagRequestDTO queryInfo) {
-        List<String> tagArray = queryInfo.getTechTag();
-
+    public ResGetByTechTagResponseDTO getPassedResByTagArray(List<String> tagArr, OrderAttr orderAttr, int pageNum, int pageSize) {
         QueryWrapper<ResInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("status", "Passed");   //资源已被共享到平台
-        for (String tag : tagArray) {
+        for (String tag : tagArr) {
             wrapper.like("tech_tag", tag);
         }
-        List<ResInfo> resList = queryResInPage(wrapper, queryInfo.getPageNum(), queryInfo.getPageSize());
+        //添加排序条件
+        addOrderAttrInWrapper(wrapper, orderAttr);
+
+        List<ResInfo> resList = queryResInPage(wrapper, pageNum, pageSize);
         int pageCount = resList.size();
         List<ResourceResume> resResumeList = parseResResume(resList);   // resource -- resResume
         int totalCount = resourceMapper.selectCount(wrapper).intValue();  //资源总量
@@ -227,19 +243,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
         resWrapper.eq("status", Status.Passed);
 
         if(!content.equals(""))
-            resWrapper.like("res_name", content);   //若为空， 仍考虑排序和筛选因素
+            resWrapper.like("res_name", content);   //若为空，作为全搜索
 
-        //结合排序
-        if(orderAttr.equals(OrderAttr.Time))   //默认按资源发布时间排序
-            resWrapper.orderByDesc("time_modified");    //为通过时间  默认新资源在前
-        else if(orderAttr.equals(OrderAttr.Views))  //按浏览量排序
-            resWrapper.orderByDesc("views");
-        else if(orderAttr.equals(OrderAttr.ColAmount))
-            resWrapper.orderByDesc("col_amount");
-        else{
-            //按照评价（平均星级）
-            logger.info("Order by {}", OrderAttr.Evaluation);
-        }
+        addOrderAttrInWrapper(resWrapper, orderAttr);
 
         //结合标签筛选
         if(!tagArr.isEmpty()) {
@@ -253,11 +259,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
-    public ResTotalSearchResponseDTO totalSearchRes(ResTotalSearchRequestDTO searchInfo, String content) {
+    public ResTotalSearchResponseDTO totalSearchRes(List<String> tagArr, OrderAttr orderAttr, String content, int pageNum, int pageSize) {
 
-        QueryWrapper<ResInfo> resWrapper = getResWrapper(searchInfo.getTagArray(), searchInfo.getOrderAttr(), content);
+        QueryWrapper<ResInfo> resWrapper = getResWrapper(tagArr, orderAttr, content);
         int totalCount = resourceMapper.selectCount(resWrapper).intValue();        //相关资源总量
-        List<ResInfo> resList = queryResInPage(resWrapper, searchInfo.getPageNum(), searchInfo.getPageSize());
+        List<ResInfo> resList = queryResInPage(resWrapper, pageNum, pageSize);
         int pageCount = resList.size();             //相关资源当前页数量
         List<ResourceResume> resResumeList = parseResResume(resList);
         ResTotalSearchResponseDTO resTotalSearchResponseDTO = new ResTotalSearchResponseDTO(resResumeList, pageCount, totalCount, "success");
@@ -266,11 +272,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, ResInfo> im
     }
 
     @Override
-    public ResColSearchResponseDTO colSearchRes(ResColSearchRequestDTO searchInfo, String tag, String content) {
-        QueryWrapper<ResInfo> resWrapper = getResWrapper(searchInfo.getTagArray(), searchInfo.getOrderAttr(), content);
+    public ResColSearchResponseDTO colSearchRes(String tag, List<String> tagArr, OrderAttr orderAttr, String content, int pageNum, int pageSize) {
+        QueryWrapper<ResInfo> resWrapper = getResWrapper(tagArr, orderAttr, content);
         resWrapper.like("tech_tag", tag);   //附加专栏自带标签
         int totalCount = resourceMapper.selectCount(resWrapper).intValue();        //相关资源总量
-        List<ResInfo> resList = queryResInPage(resWrapper, searchInfo.getPageNum(), searchInfo.getPageSize());
+        List<ResInfo> resList = queryResInPage(resWrapper, pageNum, pageSize);
         int pageCount = resList.size();             //相关资源当前页数量
         List<ResourceResume> resResumeList = parseResResume(resList);
         ResColSearchResponseDTO resColSearchResponseDTO = new ResColSearchResponseDTO(resResumeList, pageCount, totalCount, "success");
